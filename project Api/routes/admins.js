@@ -135,13 +135,14 @@ router.put("/patient/:id", checkAdmin, checkId, validateBody(adminpatientEditJoi
   try {
     const { firstName, lastName, avatar, phone, fileNumber, age, weight, height, disease, email, password } = req.body
 
+    let hash
     if(password){
-      const salt = await bcrypt.genSalt(10)
-     password = await bcrypt.hash(password, salt)
-      }
+       const salt = await bcrypt.genSalt(10)
+       hash = await bcrypt.hash(password, salt)
+       }
     const patient = await Patient.findByIdAndUpdate(
       req.params.id,
-      { $set: { firstName, lastName, avatar, phone, fileNumber, age, weight, height, disease, email, password } },
+      { $set: { firstName, lastName, avatar, phone, fileNumber, age, weight, height, disease, email, password:hash } },
       { new: true }
     )
 
@@ -201,10 +202,14 @@ router.post("/dietitien", checkAdmin, validateBody(dietitianAddJoi), async (req,
 router.put("/dietitien/:id", checkAdmin, checkId, validateBody(admindietitienEditJoi), async (req, res) => {
   try {
     const { firstName, lastName, avatar, phone, employeeId, email, password } = req.body
-
+    let hash
+    if(password){
+       const salt = await bcrypt.genSalt(10)
+       hash = await bcrypt.hash(password, salt)
+       }
     const dietitien = await Dietitian.findByIdAndUpdate(
       req.params.id,
-      { $set: { firstName, lastName, avatar, phone, employeeId, email, password } },
+      { $set: { firstName, lastName, avatar, phone, employeeId, email, password:hash } },
       { new: true }
     )
 
@@ -318,14 +323,16 @@ router.post("/employee", checkAdmin, validateBody(employeeAddJoi), async (req, r
 //put Employee
 router.put("/employee/:id", checkAdmin, checkId, validateBody(adminemployeeEditJoi), async (req, res) => {
   try {
-    const {  firstName, lastName, avatar, phone, employeeId, email, password, job } = req.body
-if(password){
+ 
+   const {  firstName, lastName, avatar, phone, employeeId, email, password, job } = req.body
+let hash
+   if(password){
       const salt = await bcrypt.genSalt(10)
-     password = await bcrypt.hash(password, salt)
+      hash = await bcrypt.hash(password, salt)
       }
     const employee = await Employee.findByIdAndUpdate(
       req.params.id,
-      { $set: { firstName, lastName, avatar, phone, employeeId, email, password, job } },
+      { $set: { firstName, lastName, avatar, phone, employeeId, email, password:hash, job } },
       { new: true }
     )
 
