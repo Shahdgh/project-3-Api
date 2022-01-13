@@ -7,10 +7,8 @@ const patientCompanionSchema = new mongoose.Schema({
   email: String,
   avatar: String,
   password: String,
-  patients: {
-    type: mongoose.Types.ObjectId,
-    ref: "Patient",
-  },
+  fileNumber:String,
+ 
   meals: [
     {
       type: mongoose.Types.ObjectId,
@@ -25,7 +23,7 @@ const signupJoi = Joi.object({
   email: Joi.string().email().required(),
   avatar: Joi.string().uri().min(6).max(1000).required(),
   password: Joi.string().min(6).max(100).required(),
-  patients: Joi.objectid().required(),
+  fileNumber: Joi.string().min(10).required(),
 })
 const loginJoi = Joi.object({
   email: Joi.string().email().required(),
@@ -37,7 +35,8 @@ const profileJoi = Joi.object({
   lastName: Joi.string().min(2).max(50).required(),
   avatar: Joi.string().uri().min(6).max(1000).required(),
   email: Joi.string().email().required(),
-  patients: Joi.objectid().required(),
+  fileNumber: Joi.string().min(10).required(),
+
   password: Joi.string().min(6).max(50).required(),
 })
 
@@ -46,8 +45,9 @@ const companionEditJoi = Joi.object({
   lastName: Joi.string().min(1).max(50),
   email: Joi.string().email(),
   avatar: Joi.string().uri().min(6).max(1000),
-  password: Joi.string().min(6).max(100),
-  patients: Joi.objectid(),
+  password: Joi.string().min(6).max(100).allow(""),
+  fileNumber: Joi.string().min(10).required(),
+
 })
 
 const PatientCompanion = mongoose.model("PatientCompanion", patientCompanionSchema)

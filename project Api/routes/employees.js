@@ -4,7 +4,7 @@ const bcrypt = require("bcrypt")
 const router = express.Router()
 const validateBody = require("../middleware/validateBody")
 const checkId = require("../middleware/checkId")
-const { Employee,loginJoi,employeeEditJoi } = require("../models/Employee")
+const { Employee, loginJoi, employeeEditJoi } = require("../models/Employee")
 const checkEmployee = require("../middleware/checkEmployee")
 
 ///////////LOGIN Employee
@@ -25,29 +25,36 @@ router.post("/login", validateBody(loginJoi), async (req, res) => {
   }
 })
 
-
 ///get profile Employee
 router.get("/profile", checkEmployee, async (req, res) => {
-    const employee = await Employee.findById(req.employeeId).select("-__v -password")
-    res.json(employee)
+  const employee = await Employee.findById(req.employeeId).select("-__v").populate({
+    path: "meals",
+    populate: "ingredients",
   })
-  
-  //put employee
-  router.put("/:id", checkEmployee,checkId, validateBody(employeeEditJoi), async (req, res) => {
-    try {
-      const {firstName,lastName, avatar, phone, email, password } = req.body
-  
-      const employee = await Employee.findByIdAndUpdate(
-        req.params.id,
-        { $set: {firstName,lastName, avatar, phone, email, password } },
-        { new: true }
-      )
-  
-      if (!employee) return res.status(404).send("employee not found")
-      res.json(employee)
-    } catch (error) {
-      res.status(500).send(error.message)
-    }
-  })
+  res.json(employee)
+})
 
-  module.exports = router
+//put employee
+router.put("/profile/:id", checkEmployee, checkId, validateBody(employeeEditJoi), async (req, res) => {
+  try {
+    const { firstName, lastName, avatar, phone, email, password } = req.body
+    let hash
+    if (password) {
+      const salt = await bcrypt.genSalt(10)
+      hash = await bcrypt.hash(password, salt)
+    }
+
+    const employee = await Employee.findByIdAndUpdate(
+      req.params.id,
+      { $set: { firstName, lastName, avatar, phone, email, password: hash } },
+      { new: true }
+    )
+
+    if (!employee) return res.status(404).send("employee not found")
+    res.json(employee)
+  } catch (error) {
+    res.status(500).send(error.message)
+  }
+})
+
+module.exports = router

@@ -6,20 +6,24 @@ const checkId = require("../middleware/checkId")
 const checkPatient = require("../middleware/checkPatient")
 const validateBody = require("../middleware/validateBody")
 const { Dietitian } = require("../models/Dietitian")
+const { Employee } = require("../models/Employee")
 const { Ingredient } = require("../models/Ingredient")
-const { Meal, mealPatientAddJoi, mealEmployeeAddJoi,mealDietitianEditJoi } = require("../models/Meal")
+const { Meal, mealPatientAddJoi, mealEmployeeAddJoi, mealDietitianEditJoi } = require("../models/Meal")
+const { Patient } = require("../models/Patient")
+const { PatientCompanion } = require("../models/PatientCompanion")
 const router = express.Router()
 
 /////get meal
 router.get("/", async (req, res) => {
   try {
-    const meal = await Meal.find().populate("patient").populate("ingredients").populate("")
+    const meal = await Meal.find().populate("patient").populate("ingredients").select("-__v")
     res.json(meal)
   } catch (error) {
     res.status(500).send(error.message)
   }
 })
-router.put("/:id", checkDietitian,validateBody(mealDietitianEditJoi) ,async (req, res) => {
+
+router.put("/patient/:id", checkId, checkDietitian, validateBody(mealDietitianEditJoi), async (req, res) => {
   try {
     const meal = await Meal.findById(req.params.id)
     if (!meal) return res.status(404).send("meal not found")
@@ -32,10 +36,12 @@ router.put("/:id", checkDietitian,validateBody(mealDietitianEditJoi) ,async (req
   }
 })
 
-router.get("/:id", async (req, res) => {
+router.get("/patient", checkDietitian, async (req, res) => {
   try {
-    const meal = await Meal.findById(req.params.id)
-    if (!meal) return res.status(404).send("meal not found")
+    const meal = await Meal.find({ patient: { $exists: true } })
+      .populate("patient")
+      .populate("ingredients")
+      .select("-__v")
 
     res.json(meal)
   } catch (error) {
@@ -43,15 +49,6 @@ router.get("/:id", async (req, res) => {
   }
 })
 
-
-// router.get("/patient",checkDietitian, async (req, res) => {
-//   try {
-//     const meal = await Meal.find()
-//     res.json(meal)
-//   } catch (error) {
-//     res.status(500).send(error.message)
-//   }
-// })
 router.post("/patient", checkPatient, async (req, res) => {
   try {
     const { ingredients } = req.body
@@ -68,6 +65,8 @@ router.post("/patient", checkPatient, async (req, res) => {
       status: "Pending",
     })
     // await Dietitian.findByIdAndUpdate()
+    await Patient.findByIdAndUpdate(req.patientId, { $push: { meals: meal._id } })
+
     await meal.save()
     res.json(meal)
   } catch (error) {
@@ -87,6 +86,8 @@ router.post("/employee", checkEmployee, async (req, res) => {
       ingredients,
       status: "Accept",
     })
+
+    await Employee.findByIdAndUpdate(req.employeeId, { $push: { meals: meal._id } })
     await meal.save()
     res.json(meal)
   } catch (error) {
@@ -106,6 +107,8 @@ router.post("/companion", checkCompanion, async (req, res) => {
       ingredients,
       status: "Accept",
     })
+    await PatientCompanion.findByIdAndUpdate(req.companionId, { $push: { meals: meal._id } }) /// بروفاسل عشان تعرض الميل لالخاصه بكل
+
     await meal.save()
     res.json(meal)
   } catch (error) {

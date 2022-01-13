@@ -52,13 +52,13 @@ const admindietitienEditJoi = Joi.object({
   employeeId: Joi.string().max(10),
   avatar: Joi.string().uri().min(6).max(1000),
   phone:Joi.string().max(10),
-  password: Joi.string().min(6).max(100),
+  password: Joi.string().min(6).max(100).allow(""),
 })
 const dietitienEditJoi = Joi.object({
   email: Joi.string().email(),
   avatar: Joi.string().uri().min(6).max(1000),
   phone:Joi.string().max(10),
-  password: Joi.string().min(6).max(100),
+  password: Joi.string().min(6).max(100).allow(""),
 })
 const Dietitian = mongoose.model("Dietitan", dietitanSchema)
 module.exports.Dietitian = Dietitian

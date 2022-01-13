@@ -33,13 +33,18 @@ router.get("/profile", checkDietitian, async (req, res) => {
 })
 
 //put Dietitian
-router.put("/:id", checkDietitian,checkId, validateBody(dietitienEditJoi), async (req, res) => {
+router.put("/profile/:id", checkDietitian,checkId, validateBody(dietitienEditJoi), async (req, res) => {
   try {
-    const { avatar, phone, email, password } = req.body
+    const { firstName,lastName,avatar, phone, email, password } = req.body
+    
+    if(password){
+      const salt = await bcrypt.genSalt(10)
+     password = await bcrypt.hash(password, salt)
+      }
 
     const dietitian = await Dietitian.findByIdAndUpdate(
       req.params.id,
-      { $set: { avatar, phone, email, password } },
+      { $set: {firstName,lastName, avatar, phone, email, password:hash } },
       { new: true }
     )
 
@@ -53,20 +58,20 @@ router.put("/:id", checkDietitian,checkId, validateBody(dietitienEditJoi), async
 /////************************ Add Ingredients*****************************************/////
 /////get Ingredients
 router.get("/ingredients", async (req, res) => {
-  const ingredient = await Ingredient.find()
+  const ingredient = await Ingredient.find().select("-__v ")
   res.json(ingredient)
 })
 //Add Ingredients
 router.post("/ingredients", checkDietitian, validateBody(ingredientAddJoi), async (req, res) => {
   try {
-    const { name, image, description, calories, type } = req.body
+    const { name, image, description, calories, types } = req.body
 
     const ingredient = new Ingredient({
       name,
       image,
       description,
       calories,
-      type,
+      types,
     })
     await ingredient.save()
     res.json(ingredient)
@@ -77,11 +82,11 @@ router.post("/ingredients", checkDietitian, validateBody(ingredientAddJoi), asyn
 ///Edit ingredients
 router.put("/ingredients/:id", checkDietitian, checkId, validateBody(ingredientEditJoi), async (req, res) => {
   try {
-    const { name, image, description, calories, type } = req.body
+    const { name, image, description, calories, types } = req.body
 
     const ingredient = await Ingredient.findByIdAndUpdate(
       req.params.id,
-      { $set: { name, image, description, calories, type } },
+      { $set: { name, image, description, calories, types } },
       { new: true }
     )
 

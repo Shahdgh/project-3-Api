@@ -32,27 +32,10 @@ const mealSchema = new mongoose.Schema({
 const mealPatientAddJoi = Joi.object({
   ingredients: Joi.array().items(Joi.objectid()).required(),
 })
-const mealPatientEditJoi = Joi.object({
-  ingredients: Joi.array().items(Joi.objectid()),
-})
-////Employ
-// const mealEmployeeAddJoi = Joi.object({
-//   ingredients: Joi.array().items(Joi.objectid()).required(),
-// })
-// const mealEmployeeEditJoi = Joi.object({
-//   ingredients: Joi.array().items(Joi.objectid()),
-// })
 
-// const mealCompanionAddJoi = Joi.object({
-//   ingredients: Joi.array().items(Joi.objectid()).required(),
-// })
-////////Companion
-// const mealCompanionEditJoi = Joi.object({
-//   ingredients: Joi.array().items(Joi.objectid()),
-// })
 
 const mealDietitianEditJoi = Joi.object({
-  comment: Joi.string().min(3).max(300),
+  comment: Joi.string().min(3).max(300).allow(""),
   status: Joi.string().valid("Accept", "Pinned", "Refused"),
 })
 
@@ -60,10 +43,5 @@ const Meal = mongoose.model("Meal", mealSchema)
 
 module.exports.Meal = Meal
 module.exports.mealPatientAddJoi = mealPatientAddJoi
-// module.exports.mealEmployeeAddJoi = mealEmployeeAddJoi
-// module.exports.mealCompanionAddJoi = mealCompanionAddJoi
 
-// module.exports.mealPatientEditJoi = mealPatientEditJoi
-// module.exports.mealEmployeeEditJoi = mealEmployeeEditJoi
-// module.exports.mealCompanionEditJoi = mealPatientEditJoi
 module.exports.mealDietitianEditJoi = mealDietitianEditJoi

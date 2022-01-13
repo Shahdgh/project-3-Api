@@ -10,18 +10,13 @@ const employeeSchema = new mongoose.Schema({
   password: String,
   phone: String,
   job: String,
-  // patients:[
-  //   {
-  //     type: mongoose.Types.ObjectId,
-  //     ref: "Patient",
-  //   }
-  // ],
-  // meals:[
-  //   {
-  //     type: mongoose.Types.ObjectId,
-  //     ref:"Meal"
-  //   },
-  // ],
+  
+  meals:[
+    {
+      type: mongoose.Types.ObjectId,
+      ref:"Meal"
+    },
+  ],
 })
 ///////////Add Employee
 const employeeAddJoi = Joi.object({
@@ -58,7 +53,7 @@ const adminemployeeEditJoi = Joi.object({
     email: Joi.string().email(),
     employeeId: Joi.string().max(10),
     avatar: Joi.string().uri().min(6).max(1000),
-    password: Joi.string().min(6).max(100),
+    password: Joi.string().min(6).max(100).allow(""),
     job: Joi.string().min(2).max(20),
     phone: Joi.string().max(10),
   })
@@ -67,7 +62,7 @@ const adminemployeeEditJoi = Joi.object({
     lastName: Joi.string().min(1).max(50),
     email: Joi.string().email(),
     avatar: Joi.string().uri().min(6).max(1000),
-    password: Joi.string().min(6).max(100),
+    password: Joi.string().min(6).max(100).allow(""),
     phone: Joi.string().max(10),
   })
 const Employee = mongoose.model("Employee", employeeSchema)

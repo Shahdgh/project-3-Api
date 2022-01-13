@@ -6,6 +6,7 @@ const bcrypt = require("bcrypt")
 const jwt = require("jsonwebtoken")
 const checkCompanion = require("../middleware/checkCompanion")
 const { PatientCompanion,signupJoi,loginJoi,companionEditJoi } = require("../models/PatientCompanion")
+const { Patient } = require("../models/Patient")
 
 
 
@@ -13,10 +14,13 @@ const { PatientCompanion,signupJoi,loginJoi,companionEditJoi } = require("../mod
 ///Signup 
 router.post("/signup",validateBody(signupJoi), async (req, res) => {
     try {
-      const { firstName, lastName,patients, email, password, avatar } = req.body
+      const { firstName, lastName,fileNumber, email, password, avatar } = req.body
       const companionFound = await PatientCompanion.findOne({ email })
-      if (companionFound) return res.status(400).send(result.error.details[10].message)
+      if (companionFound) return res.status(404).send("Patient Companion not found")
   
+      const patientFillFound = await Patient.findOne({ fileNumber  })
+      if (!patientFillFound) return res.status(404).send(" File Patient not found")
+      
       const salt = await bcrypt.genSalt(10)
       const hash = await bcrypt.hash(password, salt)
   
@@ -26,7 +30,7 @@ router.post("/signup",validateBody(signupJoi), async (req, res) => {
         email,
         password: hash,
         avatar,
-        patients,
+        fileNumber,
       })
       await companion.save()
     delete companion._doc.password
@@ -55,18 +59,29 @@ router.post("/login", validateBody(loginJoi), async (req, res) => {
   })
 //////// Profile
   router.get("/profile", checkCompanion, async (req, res) => {
-    const companion = await PatientCompanion.findById(req.companionId).select("-__v -password")
+    const companion = await PatientCompanion.findById(req.companionId).select("-__v").populate({
+      path:"meals",
+      populate:"ingredients"
+    })
     res.json(companion)
   })
 
   //put companion
-router.put("/:id", checkCompanion, checkId, validateBody(companionEditJoi), async (req, res) => {
+router.put("/profile/:id", checkCompanion, checkId, validateBody(companionEditJoi), async (req, res) => {
     try {
-        const { firstName, lastName,patients, email, password, avatar } = req.body
-  
-      const companion = await PatientCompanion.findByIdAndUpdate(
+        const { firstName, lastName,fileNumber, email, password, avatar } = req.body
+
+        let hash
+      if(password){
+        const salt = await bcrypt.genSalt(10)
+       hash = await bcrypt.hash(password, salt)
+        }
+        const patientFillFound = await Patient.findOne({ fileNumber  })////////////////
+        if (!patientFillFound) return res.status(404).send(" File Patient not found")///////////////////////
+     
+        const companion = await PatientCompanion.findByIdAndUpdate(
         req.params.id,
-        { $set: { firstName, lastName,patients, email, password, avatar } },
+        { $set: { firstName, lastName,fileNumber, email, password:hash, avatar } },
         { new: true }
       )
   

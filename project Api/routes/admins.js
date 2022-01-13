@@ -57,13 +57,13 @@ router.post("/login", validateBody(loginJoi), async (req, res) => {
 })
 /////get Admin
 router.get("/", async (req, res) => {
-  const admin = await Admin.find()
+  const admin = await Admin.find().select("-__v -password")
   res.json(admin)
-  
+   
 })
 /////profile Admin
 router.get("/profile", checkAdmin, async (req, res) => {
-  const admin = await Admin.findById(req.adminId)
+  const admin = await Admin.findById(req.adminId).select("-__v -password")
   res.json(admin)
   
 })
@@ -96,7 +96,7 @@ router.post("/add-admin",checkAdmin,validateBody(signupJoi), async (req, res) =>
 
 /////************************ Add patient*********************************************/////
 router.get("/patient", checkAdmin, async (req, res) => {
-  const patient = await Patient.find()
+  const patient = await Patient.find().select("-__v -password")
   res.json(patient)
 })
 //Add patient
@@ -135,6 +135,10 @@ router.put("/patient/:id", checkAdmin, checkId, validateBody(adminpatientEditJoi
   try {
     const { firstName, lastName, avatar, phone, fileNumber, age, weight, height, disease, email, password } = req.body
 
+    if(password){
+      const salt = await bcrypt.genSalt(10)
+     password = await bcrypt.hash(password, salt)
+      }
     const patient = await Patient.findByIdAndUpdate(
       req.params.id,
       { $set: { firstName, lastName, avatar, phone, fileNumber, age, weight, height, disease, email, password } },
@@ -163,7 +167,7 @@ router.delete("/patient/:id", checkAdmin, checkId, async (req, res) => {
 
 ////get
 router.get("/dietitien", checkAdmin, async (req, res) => {
-  const dietitien = await Dietitian.find()
+  const dietitien = await Dietitian.find().select("-__v -password")
   res.json(dietitien)
 })
 //Add dietitien
@@ -224,8 +228,8 @@ router.delete("/dietitien/:id", checkAdmin, checkId, async (req, res) => {
 })
 /////************************ Add Ingredients*****************************************/////
 /////get Ingredients
-router.get("/ingredients", checkAdmin, async (req, res) => {
-  const ingredient = await Ingredient.find().populate("types").select("-__v8")
+router.get("/ingredients",  async (req, res) => {
+  const ingredient = await Ingredient.find().populate("types").select("-__v")
   res.json(ingredient)
 })
 //Add Ingredients
@@ -279,7 +283,7 @@ router.delete("/ingredients/:id", checkAdmin, checkId, async (req, res) => {
 
 /////************************ Add Employee*********************************************/////
 router.get("/employee", checkAdmin, async (req, res) => {
-  const employee = await Employee.find()
+  const employee = await Employee.find().select("-__v -password")
   res.json(employee)
 })
 //Add Employee
@@ -315,7 +319,10 @@ router.post("/employee", checkAdmin, validateBody(employeeAddJoi), async (req, r
 router.put("/employee/:id", checkAdmin, checkId, validateBody(adminemployeeEditJoi), async (req, res) => {
   try {
     const {  firstName, lastName, avatar, phone, employeeId, email, password, job } = req.body
-
+if(password){
+      const salt = await bcrypt.genSalt(10)
+     password = await bcrypt.hash(password, salt)
+      }
     const employee = await Employee.findByIdAndUpdate(
       req.params.id,
       { $set: { firstName, lastName, avatar, phone, employeeId, email, password, job } },
@@ -341,28 +348,6 @@ router.delete("/employee/:id", checkAdmin, checkId, async (req, res) => {
   }
 })
 
-/////************************ Add Meals*****************************************/////
-/////get meal
-// router.get("/meals", checkAdmin, async (req, res) => {
-//   const meal = await Meal.find()
-//   res.json(meal)
-// })
-//Add Meal
-// router.post("/meals", checkAdmin, validateBody(mealAddJoi), async (req, res) => {
-//   try {
-//     const { patients, ingredients, comment, status } = req.body
 
-//     const meal = new Meal({
-//       patients,
-//       ingredients,
-//       comment,
-//       status,
-//     })
-//     await meal.save()
-//     res.json(meal)
-//   } catch (error) {
-//     res.status(500).send(error.message)
-//   }
-// })
 
 module.exports = router
