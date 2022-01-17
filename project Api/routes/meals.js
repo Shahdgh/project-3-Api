@@ -16,7 +16,7 @@ const router = express.Router()
 /////get meal
 router.get("/", async (req, res) => {
   try {
-    const meal = await Meal.find().populate("patient").populate("ingredients").select("-__v")
+    const meal = await Meal.find().populate("patient").populate("ingredients").populate("employee").select("-__v")
     res.json(meal)
   } catch (error) {
     res.status(500).send(error.message)
