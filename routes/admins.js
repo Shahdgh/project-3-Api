@@ -8,7 +8,7 @@ const validateBody = require("../middleware/validateBody")
 const { Patient, patientAddJoi, adminpatientEditJoi } = require("../models/Patient")
 const checkId = require("../middleware/checkId")
 const { Ingredient, ingredientAddJoi, ingredientEditJoi } = require("../models/Ingredient")
-
+const {PatientCompanion} =require("../models/PatientCompanion")
 const { Dietitian, dietitianAddJoi, admindietitienEditJoi } = require("../models/Dietitian")
 const { Employee, employeeAddJoi, adminemployeeEditJoi } = require("../models/Employee")
 
@@ -354,7 +354,10 @@ router.delete("/employee/:id", checkAdmin, checkId, async (req, res) => {
     res.status(500).send(error.message)
   }
 })
-
-
+/***************Get Companion************** */
+router.get("/companion", checkAdmin, async (req, res) => {
+  const companion = await PatientCompanion.find().select("-__v -password")
+  res.json(companion)
+})
 
 module.exports = router
