@@ -36,11 +36,11 @@ router.get("/profile", checkDietitian, async (req, res) => {
 router.put("/profile/:id", checkDietitian,checkId, validateBody(dietitienEditJoi), async (req, res) => {
   try {
     const { firstName,lastName,avatar, phone, email, password } = req.body
-    
-    if(password){
+    let hash
+    if (password) {
       const salt = await bcrypt.genSalt(10)
-     password = await bcrypt.hash(password, salt)
-      }
+      hash = await bcrypt.hash(password, salt)
+    }
 
     const dietitian = await Dietitian.findByIdAndUpdate(
       req.params.id,

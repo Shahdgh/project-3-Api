@@ -55,6 +55,8 @@ const admindietitienEditJoi = Joi.object({
   password: Joi.string().min(6).max(100).allow(""),
 })
 const dietitienEditJoi = Joi.object({
+  firstName: Joi.string().min(1).max(50),
+  lastName: Joi.string().min(1).max(50),
   email: Joi.string().email(),
   avatar: Joi.string().uri().min(6).max(1000),
   phone:Joi.string().max(10),
